@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>梅花易数 - 智断乾坤</title>
+    <title>梅花易数 - 体用生克进阶版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
     <style>
@@ -12,83 +12,77 @@
         .yang { background-color: #333; }
         .yin { display: flex; justify-content: space-between; background: transparent !important; }
         .yin::before, .yin::after { content: ''; height: 100%; width: 45%; background: #333; border-radius: 2px; }
-        .active-yao { background-color: #b91c1c !important; }
+        .active-yao { background-color: #b91c1c !important; box-shadow: 0 0 10px rgba(185, 28, 28, 0.4); }
         .yin.active-yao::before, .yin.active-yao::after { background: #b91c1c; }
         .card { background: rgba(255, 255, 255, 0.95); border: 1px solid #dcd7cf; }
-        .section-title { border-left: 4px solid #333; padding-left: 10px; font-weight: bold; margin-bottom: 1rem; }
+        .tag-ti { background: #2d3748; color: white; padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+        .tag-yong { background: #b91c1c; color: white; padding: 2px 6px; border-radius: 4px; font-size: 12px; }
     </style>
 </head>
 <body class="min-h-screen py-6 px-4">
     <div class="max-w-4xl mx-auto card p-6 md:p-10 rounded-lg shadow-2xl">
-        <header class="text-center mb-10">
-            <h1 class="text-4xl font-bold text-stone-800 mb-2">梅花易数 Web App</h1>
-            <p class="text-stone-500 italic">观象起卦 · 洞察先机</p>
+        <header class="text-center mb-10 border-b pb-6">
+            <h1 class="text-4xl font-bold text-stone-800 mb-2">梅花易数 · 体用断法</h1>
+            <p class="text-stone-500 italic">五行生克 · 能量判定</p>
         </header>
         
         <div class="bg-stone-50 p-6 rounded-xl border border-stone-200 mb-8">
-            <div class="mb-6">
-                <label class="block text-sm font-bold text-stone-600 mb-2">问事内容</label>
-                <input id="question" type="text" placeholder="请输入您想预测的事项..." 
-                    class="w-full p-3 bg-white border border-stone-300 rounded focus:ring-2 focus:ring-stone-400 outline-none transition">
-            </div>
-            <div class="grid grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div>
-                    <label class="block text-xs font-bold text-stone-500 mb-2 text-center">数字一 (上卦)</label>
-                    <input id="num1" type="number" class="w-full p-3 border rounded text-center" placeholder="如 78">
+                    <label class="block text-xs font-bold text-stone-500 mb-2 text-center uppercase">上卦数 (万物)</label>
+                    <input id="num1" type="number" class="w-full p-3 border rounded text-center focus:ring-2 focus:ring-stone-400 outline-none" placeholder="如 7">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-stone-500 mb-2 text-center">数字二 (下卦)</label>
-                    <input id="num2" type="number" class="w-full p-3 border rounded text-center" placeholder="如 89">
+                    <label class="block text-xs font-bold text-stone-500 mb-2 text-center uppercase">下卦数 (地理)</label>
+                    <input id="num2" type="number" class="w-full p-3 border rounded text-center focus:ring-2 focus:ring-stone-400 outline-none" placeholder="如 8">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-stone-500 mb-2 text-center">数字三 (动爻)</label>
-                    <input id="num3" type="number" class="w-full p-3 border rounded text-center" placeholder="如 91">
+                    <label class="block text-xs font-bold text-stone-500 mb-2 text-center uppercase">动爻数 (时机)</label>
+                    <input id="num3" type="number" class="w-full p-3 border rounded text-center focus:ring-2 focus:ring-stone-400 outline-none" placeholder="如 9">
                 </div>
             </div>
-            <button onclick="calculate()" class="w-full mt-6 bg-stone-800 text-white py-4 rounded font-bold hover:bg-stone-700 transition">
-                开启卦盘
+            <button onclick="calculate()" class="w-full bg-stone-800 text-white py-4 rounded font-bold hover:bg-black transition shadow-lg uppercase tracking-widest">
+                推算体用生克
             </button>
         </div>
 
         <div id="result" class="hidden">
+            <div class="mb-8 p-6 bg-white border-2 border-stone-800 rounded-xl text-center shadow-inner">
+                <div id="luck-level" class="text-3xl font-bold mb-2"></div>
+                <div id="luck-desc" class="text-stone-600"></div>
+            </div>
+
             <div class="grid md:grid-cols-2 gap-8 mb-8">
-                <div class="text-center p-6 border rounded-xl bg-white shadow-sm">
-                    <h3 class="text-stone-400 text-sm mb-4">【主卦：当前状态】</h3>
+                <div class="text-center p-6 border rounded-xl bg-white relative">
+                    <div id="ti-tag" class="absolute top-2 left-2 tag-ti hidden">体卦</div>
+                    <div id="yong-tag-up" class="absolute top-2 left-2 tag-yong hidden">用卦</div>
+                    <h3 class="text-stone-400 text-xs mb-4">【主卦：当前能量】</h3>
                     <div id="main-gua-graph" class="py-4"></div>
                     <p id="main-gua-name" class="text-2xl font-bold text-stone-800 mt-2"></p>
+                    <p id="main-gua-elements" class="text-sm text-stone-500 mt-1"></p>
                 </div>
-                <div class="text-center p-6 border rounded-xl bg-white shadow-sm">
-                    <h3 class="text-stone-400 text-sm mb-4">【支卦：最终走向】</h3>
+                <div class="text-center p-6 border rounded-xl bg-white">
+                    <h3 class="text-stone-400 text-xs mb-4">【支卦：未来走向】</h3>
                     <div id="change-gua-graph" class="py-4"></div>
                     <p id="change-gua-name" class="text-2xl font-bold text-stone-800 mt-2"></p>
                 </div>
             </div>
 
-            <div class="space-y-8">
-                <div class="bg-white p-6 rounded-xl border border-stone-200">
-                    <div class="section-title text-xl text-stone-800">主卦解析</div>
-                    <div class="grid md:grid-cols-2 gap-6 mt-4">
-                        <div class="p-4 bg-stone-800 text-stone-100 rounded-lg">
-                            <h5 class="font-bold mb-2 text-amber-200 uppercase text-xs">卦辞原文</h5>
-                            <p id="main-guaci" class="text-sm leading-relaxed"></p>
-                        </div>
-                        <div class="p-4 bg-stone-50 text-stone-700 rounded-lg">
-                            <h5 class="font-bold mb-2 text-stone-400 uppercase text-xs">白话解析</h5>
-                            <p id="main-modern" class="text-sm leading-relaxed"></p>
-                        </div>
-                    </div>
+            <div class="space-y-6">
+                <div class="p-6 bg-stone-800 text-stone-100 rounded-xl">
+                    <h4 class="font-bold border-b border-stone-600 pb-2 mb-3 leading-relaxed">主卦 · 五行生克分析</h4>
+                    <p id="analysis-tiyong" class="text-sm leading-loose"></p>
                 </div>
-
-                <div class="bg-white p-6 rounded-xl border border-stone-200">
-                    <div class="section-title text-xl text-stone-800">支卦（变卦）解析</div>
-                    <div class="grid md:grid-cols-2 gap-6 mt-4">
-                        <div class="p-4 bg-stone-700 text-stone-100 rounded-lg">
-                            <h5 class="font-bold mb-2 text-amber-200 uppercase text-xs">卦辞原文</h5>
-                            <p id="change-guaci" class="text-sm leading-relaxed"></p>
+                <div class="p-6 bg-white border border-stone-200 rounded-xl">
+                    <h4 class="font-bold border-b pb-2 mb-3">卦辞深度解析</h4>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <p class="text-xs font-bold text-stone-400 mb-1 uppercase tracking-tighter">当前 (主卦)</p>
+                            <p id="main-modern" class="text-sm leading-relaxed text-stone-700"></p>
                         </div>
-                        <div class="p-4 bg-stone-50 text-stone-700 rounded-lg">
-                            <h5 class="font-bold mb-2 text-stone-400 uppercase text-xs">白话解析</h5>
-                            <p id="change-modern" class="text-sm leading-relaxed"></p>
+                        <div>
+                            <p class="text-xs font-bold text-stone-400 mb-1 uppercase tracking-tighter">趋向 (支卦)</p>
+                            <p id="change-modern" class="text-sm leading-relaxed text-stone-700"></p>
                         </div>
                     </div>
                 </div>
@@ -97,16 +91,19 @@
     </div>
 
     <script>
-        // 核心八卦符号与名称
+        // 五行定义：1乾(金) 2兑(金) 3离(火) 4震(木) 5巽(木) 6坎(水) 7艮(土) 8坤(土)
         const baguaData = {
-            1: { name: "乾", symbol: [1, 1, 1] }, 2: { name: "兑", symbol: [1, 1, 0] },
-            3: { name: "离", symbol: [1, 0, 1] }, 4: { name: "震", symbol: [1, 0, 0] },
-            5: { name: "巽", symbol: [0, 1, 1] }, 6: { name: "坎", symbol: [0, 1, 0] },
-            7: { name: "艮", symbol: [0, 0, 1] }, 8: { name: "坤", symbol: [0, 0, 0] }
+            1: { name: "乾", symbol: [1, 1, 1], element: "金" },
+            2: { name: "兑", symbol: [1, 1, 0], element: "金" },
+            3: { name: "离", symbol: [1, 0, 1], element: "火" },
+            4: { name: "震", symbol: [1, 0, 0], element: "木" },
+            5: { name: "巽", symbol: [0, 1, 1], element: "木" },
+            6: { name: "坎", symbol: [0, 1, 0], element: "水" },
+            7: { name: "艮", symbol: [0, 0, 1], element: "土" },
+            8: { name: "坤", symbol: [0, 0, 0], element: "土" }
         };
 
-        // 64卦完整数据库
-        const gua64Database = {
+         const gua64Database = {
   "11": { "name": "乾为天", "text": "元，亨，利，贞。", "modern": "事业如日中天，具备大发展的条件。但需警惕“亢龙有悔”，务必保持虚心，不可刚愎自用。" },
   "88": { "name": "坤为地", "text": "元，亨，利牝马之贞。", "modern": "此时宜守不宜进，应顺应自然。多听取他人意见，以柔克刚，厚德载物方能成功。" },
   "61": { "name": "水天需", "text": "有孚，光亨，贞吉。利涉大川。", "modern": "时机尚未成熟，需耐心等待。虽然心中焦急，但守正等待终会有好结果。" },
@@ -173,6 +170,25 @@
   "86": { "name": "地水师", "text": "贞，丈人吉，无咎。", "modern": "统帅与竞争。面临重大的竞争或任务。需要严明的纪律和德高望重的领导者，才能克敌制胜。" }
         };
 
+        function getRelationship(tiElement, yongElement) {
+            const relations = {
+                "金": { "金": "比和", "木": "我克", "水": "我生", "火": "克我", "土": "生我" },
+                "木": { "金": "克我", "木": "比和", "水": "生我", "火": "我生", "土": "我克" },
+                "水": { "金": "生我", "木": "我生", "水": "比和", "火": "我克", "土": "克我" },
+                "火": { "金": "我克", "木": "生我", "水": "克我", "火": "比和", "土": "我生" },
+                "土": { "金": "生我", "木": "克我", "水": "我克", "火": "生我", "土": "比和" }
+            };
+            const rel = relations[tiElement][yongElement];
+            const luckMap = {
+                "生我": { level: "大吉 · 用生体", desc: "资助进益，贵人相助，谋事易成。" },
+                "比和": { level: "中吉 · 体用比和", desc: "朋友相助，顺遂平安，动力十足。" },
+                "我克": { level: "小吉 · 体克用", desc: "虽然辛苦劳累，但能掌控局面，最终可成。" },
+                "我生": { level: "小凶 · 体生用", desc: "泄气之象，耗费钱财，心力交瘁。" },
+                "克我": { level: "大凶 · 用克体", desc: "压力重重，受损受阻，易有突发灾祸。" }
+            };
+            return luckMap[rel];
+        }
+
         function findGuaIdBySymbol(symbolArray) {
             for (let id in baguaData) {
                 if (baguaData[id].symbol.every((val, index) => val === symbolArray[index])) return id;
@@ -184,11 +200,9 @@
             const container = document.getElementById(containerId);
             container.innerHTML = "";
             const fullYaos = [...baguaData[lowerId].symbol, ...baguaData[upperId].symbol];
-            
             for (let i = 5; i >= 0; i--) {
                 const div = document.createElement('div');
-                const isMoving = (i + 1) === activeYao;
-                div.className = `gua-line ${fullYaos[i] === 1 ? 'yang' : 'yin'} ${isMoving ? 'active-yao' : ''}`;
+                div.className = `gua-line ${fullYaos[i] === 1 ? 'yang' : 'yin'} ${ (i+1) === activeYao ? 'active-yao' : ''}`;
                 container.appendChild(div);
             }
             return fullYaos;
@@ -198,46 +212,52 @@
             const n1 = parseInt(document.getElementById('num1').value);
             const n2 = parseInt(document.getElementById('num2').value);
             const n3 = parseInt(document.getElementById('num3').value);
-
-            if (!n1 || !n2 || !n3) return alert("请输入完整起卦数字");
+            if (!n1 || !n2 || !n3) return alert("请正确输入三个起卦数");
 
             const upId = n1 % 8 === 0 ? 8 : n1 % 8;
             const downId = n2 % 8 === 0 ? 8 : n2 % 8;
             const movingYao = n3 % 6 === 0 ? 6 : n3 % 6;
 
-            // 1. 获取主卦
-            const mainYaos = drawGua('main-gua-graph', downId, upId, movingYao);
-            const mainKey = `${upId}${downId}`;
-            const mainInfo = gua64Database[mainKey] || { 
-                name: baguaData[upId].name + baguaData[downId].name + "卦", 
-                text: "原文参见《周易》。" , 
-                modern: "此卦代表当前局势，动爻在" + movingYao + "爻。" 
-            };
+            // 1. 体用判定
+            // 动爻在1-3爻，下卦为用；动爻在4-6爻，上卦为用。
+            let tiId, yongId;
+            if (movingYao <= 3) {
+                yongId = downId; tiId = upId;
+            } else {
+                yongId = upId; tiId = downId;
+            }
 
-            // 2. 获取支卦
+            // 2. 渲染卦象
+            const mainYaos = drawGua('main-gua-graph', downId, upId, movingYao);
+            document.getElementById('main-gua-name').innerText = baguaData[upId].name + baguaData[downId].name;
+            document.getElementById('main-gua-elements').innerText = `${baguaData[upId].name}(${baguaData[upId].element}) / ${baguaData[downId].name}(${baguaData[downId].element})`;
+
+            // 3. 计算变卦
             let changeYaos = [...mainYaos];
             changeYaos[movingYao - 1] = changeYaos[movingYao - 1] === 1 ? 0 : 1;
-            const changeDownId = findGuaIdBySymbol(changeYaos.slice(0, 3));
-            const changeUpId = findGuaIdBySymbol(changeYaos.slice(3, 6));
-            drawGua('change-gua-graph', changeDownId, changeUpId);
+            const cDownId = findGuaIdBySymbol(changeYaos.slice(0, 3));
+            const cUpId = findGuaIdBySymbol(changeYaos.slice(3, 6));
+            drawGua('change-gua-graph', cDownId, cUpId);
+            document.getElementById('change-gua-name').innerText = baguaData[cUpId].name + baguaData[cDownId].name;
 
-            const changeKey = `${changeUpId}${changeDownId}`;
-            const changeInfo = gua64Database[changeKey] || { 
-                name: baguaData[changeUpId].name + baguaData[changeDownId].name + "卦", 
-                text: "原文参见《周易》。" , 
-                modern: "这是事情发展的最终变数。预示着未来环境的变化。" 
-            };
-
-            // 3. 填充解析内容
+            // 4. 生克逻辑判定
+            const resultObj = getRelationship(baguaData[tiId].element, baguaData[yongId].element);
+            
+            // 5. 更新UI
             document.getElementById('result').classList.remove('hidden');
-            document.getElementById('main-gua-name').innerText = mainInfo.name;
-            document.getElementById('change-gua-name').innerText = changeInfo.name;
-            
-            document.getElementById('main-guaci').innerText = mainInfo.text;
-            document.getElementById('main-modern').innerText = mainInfo.modern;
-            
-            document.getElementById('change-guaci').innerText = changeInfo.text;
-            document.getElementById('change-modern').innerText = changeInfo.modern;
+            document.getElementById('luck-level').innerText = resultObj.level;
+            document.getElementById('luck-desc').innerText = resultObj.desc;
+            document.getElementById('analysis-tiyong').innerHTML = `
+                本卦中：<strong>${baguaData[tiId].name}</strong>卦为体（代表您），属性为${baguaData[tiId].element}；
+                <strong>${baguaData[yongId].name}</strong>卦为用（代表所问之事），属性为${baguaData[yongId].element}。<br>
+                五行关系：${baguaData[yongId].element}对${baguaData[tiId].element}形成<strong>${resultObj.level.split(' · ')[1]}</strong>之局。
+            `;
+
+            // 卦辞显示
+            const mKey = `${upId}${downId}`;
+            const cKey = `${cUpId}${cDownId}`;
+            document.getElementById('main-modern').innerText = gua64Database[mKey]?.modern || "当前局面较为复杂，需结合体用生克参考。";
+            document.getElementById('change-modern').innerText = gua64Database[cKey]?.modern || "未来将发生质变，变卦提示了最终的结果走向。";
 
             window.scrollTo({ top: document.getElementById('result').offsetTop - 20, behavior: 'smooth' });
         }
