@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>梅花易数 - 体用生克进阶版</title>
+    <title>梅花易数 - 体用断法</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
     <style>
@@ -27,6 +27,10 @@
         </header>
         
         <div class="bg-stone-50 p-6 rounded-xl border border-stone-200 mb-8">
+            <div class="mb-6">
+                <label class="block text-sm font-bold text-stone-600 mb-2">所问何事</label>
+                <input id="question" type="text" placeholder="例如：今日财运如何？" class="w-full p-3 border border-stone-300 rounded focus:ring-2 focus:ring-stone-400 outline-none">
+            </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div>
                     <label class="block text-xs font-bold text-stone-500 mb-2 text-center uppercase">上卦数 (万物)</label>
@@ -47,6 +51,11 @@
         </div>
 
         <div id="result" class="hidden">
+            <div class="mb-6 p-4 bg-stone-100 border-l-4 border-stone-800 rounded shadow-sm">
+                <span class="text-xs font-bold text-stone-500 uppercase block mb-1">所问之事：</span>
+                <p id="display-question" class="text-xl font-bold text-stone-800"></p>
+            </div>
+
             <div class="mb-8 p-6 bg-white border-2 border-stone-800 rounded-xl text-center shadow-inner">
                 <div id="luck-level" class="text-3xl font-bold mb-2"></div>
                 <div id="luck-desc" class="text-stone-600"></div>
@@ -54,8 +63,6 @@
 
             <div class="grid md:grid-cols-2 gap-8 mb-8">
                 <div class="text-center p-6 border rounded-xl bg-white relative">
-                    <div id="ti-tag" class="absolute top-2 left-2 tag-ti hidden">体卦</div>
-                    <div id="yong-tag-up" class="absolute top-2 left-2 tag-yong hidden">用卦</div>
                     <h3 class="text-stone-400 text-xs mb-4">【主卦：当前能量】</h3>
                     <div id="main-gua-graph" class="py-4"></div>
                     <p id="main-gua-name" class="text-2xl font-bold text-stone-800 mt-2"></p>
@@ -91,7 +98,6 @@
     </div>
 
     <script>
-        // 五行定义：1乾(金) 2兑(金) 3离(火) 4震(木) 5巽(木) 6坎(水) 7艮(土) 8坤(土)
         const baguaData = {
             1: { name: "乾", symbol: [1, 1, 1], element: "金" },
             2: { name: "兑", symbol: [1, 1, 0], element: "金" },
@@ -209,17 +215,22 @@
         }
 
         function calculate() {
+            const questionText = document.getElementById('question').value;
             const n1 = parseInt(document.getElementById('num1').value);
             const n2 = parseInt(document.getElementById('num2').value);
             const n3 = parseInt(document.getElementById('num3').value);
+
+            if (!questionText) return alert("请输入您想占问的内容");
             if (!n1 || !n2 || !n3) return alert("请正确输入三个起卦数");
 
             const upId = n1 % 8 === 0 ? 8 : n1 % 8;
             const downId = n2 % 8 === 0 ? 8 : n2 % 8;
             const movingYao = n3 % 6 === 0 ? 6 : n3 % 6;
 
-            // 1. 体用判定
-            // 动爻在1-3爻，下卦为用；动爻在4-6爻，上卦为用。
+            // 1. 回显问题
+            document.getElementById('display-question').innerText = questionText;
+
+            // 2. 体用判定
             let tiId, yongId;
             if (movingYao <= 3) {
                 yongId = downId; tiId = upId;
@@ -227,12 +238,12 @@
                 yongId = upId; tiId = downId;
             }
 
-            // 2. 渲染卦象
+            // 3. 渲染主卦
             const mainYaos = drawGua('main-gua-graph', downId, upId, movingYao);
             document.getElementById('main-gua-name').innerText = baguaData[upId].name + baguaData[downId].name;
             document.getElementById('main-gua-elements').innerText = `${baguaData[upId].name}(${baguaData[upId].element}) / ${baguaData[downId].name}(${baguaData[downId].element})`;
 
-            // 3. 计算变卦
+            // 4. 计算变卦
             let changeYaos = [...mainYaos];
             changeYaos[movingYao - 1] = changeYaos[movingYao - 1] === 1 ? 0 : 1;
             const cDownId = findGuaIdBySymbol(changeYaos.slice(0, 3));
@@ -240,10 +251,10 @@
             drawGua('change-gua-graph', cDownId, cUpId);
             document.getElementById('change-gua-name').innerText = baguaData[cUpId].name + baguaData[cDownId].name;
 
-            // 4. 生克逻辑判定
+            // 5. 生克逻辑判定
             const resultObj = getRelationship(baguaData[tiId].element, baguaData[yongId].element);
             
-            // 5. 更新UI
+            // 6. 更新UI
             document.getElementById('result').classList.remove('hidden');
             document.getElementById('luck-level').innerText = resultObj.level;
             document.getElementById('luck-desc').innerText = resultObj.desc;
@@ -253,7 +264,6 @@
                 五行关系：${baguaData[yongId].element}对${baguaData[tiId].element}形成<strong>${resultObj.level.split(' · ')[1]}</strong>之局。
             `;
 
-            // 卦辞显示
             const mKey = `${upId}${downId}`;
             const cKey = `${cUpId}${cDownId}`;
             document.getElementById('main-modern').innerText = gua64Database[mKey]?.modern || "当前局面较为复杂，需结合体用生克参考。";
